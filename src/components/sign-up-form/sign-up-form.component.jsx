@@ -23,10 +23,6 @@ const SignUpForm = () => {
   const handleSubmit = async (event) => {
     event.preventDefault()
     const { displayName, email, password, confirmPassword } = formFields
-    if (!email) {
-      alert("Please fill email")
-      return;
-    }
     if (password !== confirmPassword) {
       alert("Passwords do not match")
       return;
