@@ -3,7 +3,7 @@ import FormInput from '../form-input/form-input.component';
 
 import './sign-in-form.styles.scss'
 import Button from '../button/button.component';
-import { createUserDocumentFromAuth, signInAuthUserWithEmailAndPassword, signInWithGooglePopup } from "../../utils/firebase/firebase.utils";
+import { signInAuthUserWithEmailAndPassword, signInWithGooglePopup } from "../../utils/firebase/firebase.utils";
 
 const defaultFormFields = {
   displayName: '',

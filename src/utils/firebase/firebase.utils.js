@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithRedirect, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+import { useSyncExternalStore } from 'react';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBhO55di9NrGUHFI0uqw3PriQeuAR0EtFI",
@@ -24,7 +25,7 @@ export const signInWithGoogleRedirect = () => signInWithRedirect(auth, googlePro
 
 export const db = getFirestore()
 
-export const createUserDocumentFromAuth = async (userAuth, additionalInfo = {}) => {
+const createUserDocumentFromAuth = async (userAuth, additionalInfo = {}) => {
   if (!userAuth) return
   const userDocRef = doc(db, 'users', userAuth.uid)
 
@@ -56,7 +57,15 @@ export const createAuthUserWithEmailAndPassword = async (email, password) => {
 
 export const signOutUser = async () => await signOut(auth)
 
-export const onAuthStateChangedListener = (callback) => {
-  if (!callback) return;
-  onAuthStateChanged(auth, callback)
+export const useAuthState = () => {
+  const listener = (callback) => {
+    if (!callback) return;
+    onAuthStateChanged(auth, (user) => {
+      if (user) createUserDocumentFromAuth(user)
+      callback()
+    })
+  }
+  return useSyncExternalStore(
+    listener, () => auth.currentUser
+  )
 }
