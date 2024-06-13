@@ -25,7 +25,8 @@ export const signInWithGoogleRedirect = () => signInWithRedirect(auth, googlePro
 
 export const db = getFirestore()
 
-const createUserDocumentFromAuth = async (userAuth, additionalInfo = {}) => {
+// Only exposed for user sign up with custom data
+export const createUserDocumentFromAuth = async (userAuth, additionalInfo = {}) => {
   if (!userAuth) return
   const userDocRef = doc(db, 'users', userAuth.uid)
 
