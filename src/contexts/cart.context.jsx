@@ -12,13 +12,28 @@ const addCartItem = (cartItems, productToAdd) => {
     return [...cartItems, { ...productToAdd, quantity: 1 }]
   }
 }
+const decreaseItemQty = (cartItems, productToDecrease) => {
+  return cartItems.map(cartItem =>
+    cartItem.id === productToDecrease.id
+      ? { ...cartItem, quantity: (cartItem.quantity > 1 ? cartItem.quantity - 1 : cartItem.quantity) }
+      : cartItem
+  )
+
+}
+const removeCartItem = (cartItems, productToRemove) => {
+  return cartItems.filter(cartItem => cartItem.id !== productToRemove.id)
+}
 
 export const CartContext = createContext({
   expanded: false,
   setExpanded: () => false,
   cartItems: [],
+  cartCount: 0,
+  totalCount: 0,
   addItemToCart: () => {},
-  cartCount: 0
+  increaseItemQuantity: () => {},
+  decreaseItemQuantity: () => {},
+  removeItemFromCart: () => {},
 })
 
 export const CartProvider = ({children}) => {
@@ -28,11 +43,20 @@ export const CartProvider = ({children}) => {
   const addItemToCart = (productToAdd) => {
     setCartItems(addCartItem(cartItems, productToAdd))
   }
+  const decreaseItemQuantity = (productToDecrease) => {
+    setCartItems(decreaseItemQty(cartItems, productToDecrease))
+  }
+  const removeItemFromCart = (productToRemove) => {
+    setCartItems(removeCartItem(cartItems, productToRemove))
+  }
 
   const value = {
-    expanded, setExpanded, cartItems, addItemToCart,
+    expanded, setExpanded, cartItems, addItemToCart, decreaseItemQuantity, removeItemFromCart,
     cartCount: cartItems.reduce(
       (total, cartItem) => total + cartItem.quantity, 0
+    ),
+    totalCount: cartItems.reduce(
+      (total, cartItem) => total + cartItem.quantity * cartItem.price, 0
     )
   }
 
