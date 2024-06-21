@@ -72,32 +72,30 @@ export const CartProvider = ({children}) => {
   const [ { cartItems, expanded, cartCount, cartTotal}, dispatch ] =
     useReducer(cartReducer, INITIAL_STATE)
 
-  const updateCartItemsReducer = (cartItems) => {
+  const updateCartItemsDispatch = (cartItems) => {
     const cartCount = cartItems.reduce(
       (total, cartItem) => total + cartItem.quantity, 0
     )
     const cartTotal = cartItems.reduce(
       (total, cartItem) => total + cartItem.quantity * cartItem.price, 0
     )
-    dispatch(
-      createAction(
-        CART_ACTION_TYPES.SET_CART_ITEMS,
-        { cartItems, cartCount, cartTotal }
-      )
-    )
+    dispatch(createAction(
+      CART_ACTION_TYPES.SET_CART_ITEMS,
+      { cartItems, cartCount, cartTotal }
+    ))
   }
 
   const addItemToCart = (productToAdd) => {
     const newCartItems = addCartItem(cartItems, productToAdd)
-    updateCartItemsReducer(newCartItems)
+    updateCartItemsDispatch(newCartItems)
   }
   const decreaseItemQuantity = (productToDecrease) => {
     const newCartItems = decreaseItemQty(cartItems, productToDecrease)
-    updateCartItemsReducer(newCartItems)
+    updateCartItemsDispatch(newCartItems)
   }
   const removeItemFromCart = (productToRemove) => {
     const newCartItems = removeCartItem(cartItems, productToRemove)
-    updateCartItemsReducer(newCartItems)
+    updateCartItemsDispatch(newCartItems)
   }
 
   const setExpanded = (expanded) => {
