@@ -1,4 +1,5 @@
-import { createContext, useState } from "react";
+import { createContext, useReducer } from "react";
+import { createAction } from '../utils/firebase/reducer/reducer.utils';
 
 const addCartItem = (cartItems, productToAdd) => {
   const existingCartItem = cartItems.find(ci => productToAdd.id === ci.id)
@@ -8,9 +9,8 @@ const addCartItem = (cartItems, productToAdd) => {
         ? {...cartItem, quantity: cartItem.quantity + 1}
         : cartItem
     )
-  } else {
-    return [...cartItems, { ...productToAdd, quantity: 1 }]
   }
+  return [...cartItems, { ...productToAdd, quantity: 1 }]
 }
 const decreaseItemQty = (cartItems, productToDecrease) => {
   return cartItems.map(cartItem =>
@@ -26,38 +26,87 @@ const removeCartItem = (cartItems, productToRemove) => {
 
 export const CartContext = createContext({
   expanded: false,
-  setExpanded: () => false,
   cartItems: [],
   cartCount: 0,
-  totalCount: 0,
+  cartTotal: 0,
+  setExpanded: () => false,
   addItemToCart: () => {},
   increaseItemQuantity: () => {},
   decreaseItemQuantity: () => {},
   removeItemFromCart: () => {},
 })
 
+const INITIAL_STATE = {
+  expanded: false,
+  cartItems: [],
+  cartCount: 0,
+  cartTotal: 0,
+}
+
+const CART_ACTION_TYPES = {
+  SET_CART_ITEMS: 'SET_CART_ITEMS',
+  SET_EXPANDED: 'SET_EXPANDED',
+}
+
+const cartReducer = (state, action) => {
+  const { type, payload } = action
+
+  switch (type) {
+    case CART_ACTION_TYPES.SET_CART_ITEMS:
+      return {
+        ...state,
+        ...payload
+      }
+    case CART_ACTION_TYPES.SET_EXPANDED:
+      return {
+        ...state,
+        expanded: payload
+      }
+
+    default:
+      throw new Error(`unhandled type ${type} in cartReducer`)
+  }
+}
+
 export const CartProvider = ({children}) => {
-  const [expanded, setExpanded] = useState(false)
-  const [cartItems, setCartItems] = useState([])
+  const [ { cartItems, expanded, cartCount, cartTotal}, dispatch ] =
+    useReducer(cartReducer, INITIAL_STATE)
+
+  const updateCartItemsReducer = (cartItems) => {
+    const cartCount = cartItems.reduce(
+      (total, cartItem) => total + cartItem.quantity, 0
+    )
+    const cartTotal = cartItems.reduce(
+      (total, cartItem) => total + cartItem.quantity * cartItem.price, 0
+    )
+    dispatch(
+      createAction(
+        CART_ACTION_TYPES.SET_CART_ITEMS,
+        { cartItems, cartCount, cartTotal }
+      )
+    )
+  }
 
   const addItemToCart = (productToAdd) => {
-    setCartItems(addCartItem(cartItems, productToAdd))
+    const newCartItems = addCartItem(cartItems, productToAdd)
+    updateCartItemsReducer(newCartItems)
   }
   const decreaseItemQuantity = (productToDecrease) => {
-    setCartItems(decreaseItemQty(cartItems, productToDecrease))
+    const newCartItems = decreaseItemQty(cartItems, productToDecrease)
+    updateCartItemsReducer(newCartItems)
   }
   const removeItemFromCart = (productToRemove) => {
-    setCartItems(removeCartItem(cartItems, productToRemove))
+    const newCartItems = removeCartItem(cartItems, productToRemove)
+    updateCartItemsReducer(newCartItems)
+  }
+
+  const setExpanded = (expanded) => {
+    dispatch(createAction(CART_ACTION_TYPES.SET_EXPANDED, expanded))
   }
 
   const value = {
-    expanded, setExpanded, cartItems, addItemToCart, decreaseItemQuantity, removeItemFromCart,
-    cartCount: cartItems.reduce(
-      (total, cartItem) => total + cartItem.quantity, 0
-    ),
-    totalCount: cartItems.reduce(
-      (total, cartItem) => total + cartItem.quantity * cartItem.price, 0
-    )
+    expanded, cartItems, cartCount, cartTotal,
+    setExpanded, addItemToCart, decreaseItemQuantity, removeItemFromCart,
   }
 
   return <CartContext.Provider value={value}>
