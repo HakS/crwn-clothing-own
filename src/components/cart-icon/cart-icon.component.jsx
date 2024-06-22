@@ -1,12 +1,16 @@
+import { useDispatch, useSelector } from 'react-redux';
+
 import { CartIconContainer, StyledShoppingIcon, ItemCount } from './cart-icon.styles'
-import { useContext } from 'react'
-import { CartContext } from '../../contexts/cart.context';
+import { setExpanded } from '../../store/cart/cart.action';
+import { selectExpanded, selectCartCount } from '../../store/cart/cart.selector';
 
 const CartIcon = () => {
-  const { expanded, setExpanded, cartCount } = useContext(CartContext)
+  const expanded = useSelector(selectExpanded)
+  const cartCount = useSelector(selectCartCount)
+  const dispatch = useDispatch()
 
   const handleToggle = () => {
-    setExpanded(!expanded)
+    dispatch(setExpanded(!expanded))
   }
 
   return (
