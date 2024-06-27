@@ -8,7 +8,7 @@ import CartDropdown from '../../components/cart-dropdown/cart-dropdown.component
 import { NavigationContainer, LogoContainer, NavLinks, NavLink } from './navigation.styles';
 import { selectCurrentUser } from '../../store/user/user.selector';
 import { selectExpanded } from "../../store/cart/cart.selector";
-import { signOutStart } from "../../store/user/user.action";
+import { signOutStart } from "../../store/user/user.reducer";
 
 const Navigation = () => {
   const currentUser = useSelector(selectCurrentUser)

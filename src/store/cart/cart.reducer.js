@@ -1,4 +1,27 @@
-import { CART_ACTION_TYPES } from "./cart.types"
+import { createSlice } from "@reduxjs/toolkit"
+
+const addCartItem = (cartItems, productToAdd) => {
+  const existingCartItem = cartItems.find(ci => productToAdd.id === ci.id)
+  if (existingCartItem) {
+    return cartItems.map(cartItem =>
+      cartItem.id === productToAdd.id
+        ? { ...cartItem, quantity: cartItem.quantity + 1 }
+        : cartItem
+    )
+  }
+  return [...cartItems, { ...productToAdd, quantity: 1 }]
+}
+const decreaseItemQty = (cartItems, productToDecrease) => {
+  return cartItems.map(cartItem =>
+    cartItem.id === productToDecrease.id
+      ? { ...cartItem, quantity: (cartItem.quantity > 1 ? cartItem.quantity - 1 : cartItem.quantity) }
+      : cartItem
+  )
+
+}
+const removeCartItem = (cartItems, productToRemove) => {
+  return cartItems.filter(cartItem => cartItem.id !== productToRemove.id)
+}
 
 const INITIAL_STATE = {
   expanded: false,
@@ -7,22 +30,22 @@ const INITIAL_STATE = {
   cartTotal: 0,
 }
 
-export const cartReducer = (state = INITIAL_STATE, action = {}) => {
-  const { type, payload } = action
-
-  switch (type) {
-    case CART_ACTION_TYPES.SET_CART_ITEMS:
-      return {
-        ...state,
-        cartItems: payload
-      }
-    case CART_ACTION_TYPES.SET_EXPANDED:
-      return {
-        ...state,
-        expanded: payload
-      }
-
-    default:
-      return state
+export const cartSlice = createSlice({
+  name: 'cart',
+  initialState: INITIAL_STATE,
+  reducers: {
+    addItemToCart(state, action) { state.cartItems = addCartItem(state.cartItems, action.payload) },
+    decreaseItemQuantity(state, action) { state.cartItems = decreaseItemQty(state.cartItems, action.payload) },
+    removeItemFromCart(state, action) { state.cartItems = removeCartItem(state.cartItems, action.payload) },
+    setExpanded(state, action) { state.expanded = action.payload },
   }
-}
+})
+
+export const {
+  addItemToCart,
+  decreaseItemQuantity,
+  removeItemFromCart,
+  setExpanded,
+} = cartSlice.actions
+
+export const cartReducer = cartSlice.reducer

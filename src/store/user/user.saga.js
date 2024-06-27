@@ -1,12 +1,12 @@
 import { all, call, put, takeLatest } from "redux-saga/effects"
-import { USER_ACTION_TYPES } from "./user.types"
 import { createAuthUserWithEmailAndPassword, createUserDocumentFromAuth, getCurrentUser, signInAuthUserWithEmailAndPassword, signInWithGooglePopup, signOutUser } from "../../utils/firebase/firebase.utils"
-import { signInSuccess, signInFailed, signOutSuccess, signUpSuccess } from './user.action'
+import { signInSuccess, signInFailed, signOutSuccess, signUpSuccess, emailSignInStart, googleSignInStart, signUpStart, signOutStart, checkUserSession } from './user.reducer'
 
 export function* getSnapshotFromUserAuth(userAuth, additionalDetails) {
   try {
     const userSnapshot = yield call(createUserDocumentFromAuth, userAuth, additionalDetails)
-    yield put(signInSuccess({ id: userSnapshot.id, ...userSnapshot.data()}))
+    const { displayName, email, createdAt } = userSnapshot.data()
+    yield put(signInSuccess({ id: userSnapshot.id, displayName, email, createdAt: createdAt.toJSON() }))
   } catch (error) {
     yield put(signInFailed(error))
   }
@@ -61,25 +61,25 @@ export function* isUserAuthenticated() {
 }
 
 export function* onEmailSignInStart() {
-  yield takeLatest(USER_ACTION_TYPES.EMAIL_SIGN_IN_START, signInWithEmail)
+  yield takeLatest(emailSignInStart().type, signInWithEmail)
 }
 export function* onGoogleSignInStart() {
-  yield takeLatest(USER_ACTION_TYPES.GOOGLE_SIGN_IN_START, signInWithGoogle)
+  yield takeLatest(googleSignInStart().type, signInWithGoogle)
 }
 
 export function* onSignUpStart() {
-  yield takeLatest(USER_ACTION_TYPES.SIGN_UP_START, signUp)
+  yield takeLatest(signUpStart().type, signUp)
 }
 export function* onSignUpSuccess() {
-  yield takeLatest(USER_ACTION_TYPES.SIGN_UP_SUCCESS, signInAfterSignUp)
+  yield takeLatest(signUpSuccess().type, signInAfterSignUp)
 }
 
 export function* onSignOutStart() {
-  yield takeLatest(USER_ACTION_TYPES.SIGN_OUT_START, signOut)
+  yield takeLatest(signOutStart().type, signOut)
 }
 
 export function* onCheckUserSession() {
-  yield takeLatest(USER_ACTION_TYPES.CHECK_USER_SESSION, isUserAuthenticated)
+  yield takeLatest(checkUserSession().type, isUserAuthenticated)
 }
 
 export function* userSagas() {

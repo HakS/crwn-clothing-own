@@ -5,7 +5,7 @@ import './sign-up-form.styles.scss'
 
 import FormInput from '../form-input/form-input.component';
 import Button from '../button/button.component';
-import { signUpStart } from "../../store/user/user.action";
+import { signUpStart } from "../../store/user/user.reducer";
 
 const defaultFormFields = {
   displayName: '',
