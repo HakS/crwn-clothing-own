@@ -63,7 +63,7 @@ export const createUserDocumentFromAuth = async (userAuth, additionalInfo = {}) 
       console.error('error creating the user', error.message)
     }
   }
-  return userDocRef
+  return userSnapshot
 }
 
 export const signInAuthUserWithEmailAndPassword = async (email, password) => {
@@ -78,18 +78,16 @@ export const createAuthUserWithEmailAndPassword = async (email, password) => {
 
 export const signOutUser = async () => await signOut(auth)
 
-export const onAuthStateChangedListener = (callback) =>
-  onAuthStateChanged(auth, callback);
 
-export const useAuthState = () => {
-  const listener = (callback) => {
-    if (!callback) return;
-    onAuthStateChanged(auth, (user) => {
-      if (user) createUserDocumentFromAuth(user)
-      callback()
-    })
-  }
-  return useSyncExternalStore(
-    listener, () => auth.currentUser
-  )
+export const getCurrentUser = () => {
+  return new Promise((y, n) => {
+    const toUnsubscribe = onAuthStateChanged(
+      auth,
+      (userAuth) => {
+        toUnsubscribe()
+        y(userAuth)
+      },
+      n
+    )
+  })
 }

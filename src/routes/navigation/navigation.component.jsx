@@ -1,22 +1,21 @@
 import { Outlet } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { ReactComponent as CrwnLogo } from '../../assets/crown.svg'
 
-import { signOutUser } from "../../utils/firebase/firebase.utils";
 import CartIcon from '../../components/cart-icon/cart-icon.component';
 import CartDropdown from '../../components/cart-dropdown/cart-dropdown.component';
 import { NavigationContainer, LogoContainer, NavLinks, NavLink } from './navigation.styles';
 import { selectCurrentUser } from '../../store/user/user.selector';
 import { selectExpanded } from "../../store/cart/cart.selector";
+import { signOutStart } from "../../store/user/user.action";
 
 const Navigation = () => {
   const currentUser = useSelector(selectCurrentUser)
   const expanded = useSelector(selectExpanded)
+  const dispatch = useDispatch()
 
-  const signOutHandler = async () => {
-    await signOutUser()
-  }
+  const signOutHandler = () => dispatch(signOutStart())
 
   return  (
     <>
