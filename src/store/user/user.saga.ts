@@ -1,13 +1,13 @@
 import { all, call, put, takeLatest } from "typed-redux-saga/macro"
 import { AdditionalInformation, RawUserData, createAuthUserWithEmailAndPassword, createUserDocumentFromAuth, getCurrentUser, signInAuthUserWithEmailAndPassword, signInWithGooglePopup, signOutUser } from "../../utils/firebase/firebase.utils"
 import { signInSuccess, signInFailed, signOutSuccess, signUpSuccess, emailSignInStart, googleSignInStart, signUpStart, signOutStart, checkUserSession } from './user.reducer'
-import { User } from "firebase/auth"
 
 export function* getSnapshotFromUserAuth(userAuth: RawUserData, additionalDetails?: AdditionalInformation) {
   try {
     const userSnapshot = yield* call(createUserDocumentFromAuth, userAuth, additionalDetails)
+    console.log("SAGA ENTERED SNAPSHOT BUILD", userAuth, additionalDetails)
     if (userSnapshot) {
-      console.log(userSnapshot.data())
+      console.log(userSnapshot, userSnapshot.data())
       const userSnapshotData = userSnapshot.data()
       if (userSnapshotData) {
         const { displayName, email, createdAt } = userSnapshotData
@@ -15,7 +15,7 @@ export function* getSnapshotFromUserAuth(userAuth: RawUserData, additionalDetail
       }
     }
   } catch (error) {
-    yield* put(signInFailed(error as Error as Error))
+    yield* put(signInFailed(error as Error))
   }
 }
 
@@ -44,13 +44,17 @@ export function* signUp({ payload: { displayName, email, password } }: ReturnTyp
     const userCredential = yield* call(createAuthUserWithEmailAndPassword, email, password)
     if (userCredential) {
       const { user: { uid, email } } = userCredential
-      yield* put(signUpSuccess({ user: { uid, displayName, email } as RawUserData, additionalDetails: { displayName } } ))
+      yield* put(signUpSuccess({
+        user: { uid, displayName, email } as RawUserData,
+        additionalDetails: { displayName }
+      } ))
     }
   } catch (error) {
     yield* put(signInFailed(error as Error))
   }
 }
 export function* signInAfterSignUp({ payload: { user, additionalDetails } }: ReturnType<typeof signUpSuccess>) {
+  console.log("AFTER SIGN UP", arguments, user, additionalDetails)
   yield* call(getSnapshotFromUserAuth, user, additionalDetails)
 }
 

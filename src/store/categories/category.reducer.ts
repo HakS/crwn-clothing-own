@@ -1,4 +1,4 @@
-import { Action, PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { Category } from './category.types'
 
 export type CategoriesState = {
