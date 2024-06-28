@@ -7,9 +7,9 @@ export enum BUTTON_TYPE_CLASSES {
 }
 
 type Props = {
-  buttonType: BUTTON_TYPE_CLASSES,
-  isLoading: boolean,
-  [x:string]: any;
+  buttonType?: BUTTON_TYPE_CLASSES,
+  isLoading?: boolean,
+  [otherProps: string]: any;
 }
 
 const getButton = (buttonType = BUTTON_TYPE_CLASSES.base) => ({

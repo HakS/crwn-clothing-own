@@ -1,6 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit"
+import { CartItem } from "./cart.types"
+import { CategoryItem } from "../categories/category.types"
 
-const addCartItem = (cartItems, productToAdd) => {
+const addCartItem = (cartItems: CartItem[], productToAdd: CategoryItem) => {
   const existingCartItem = cartItems.find(ci => productToAdd.id === ci.id)
   if (existingCartItem) {
     return cartItems.map(cartItem =>
@@ -11,7 +13,7 @@ const addCartItem = (cartItems, productToAdd) => {
   }
   return [...cartItems, { ...productToAdd, quantity: 1 }]
 }
-const decreaseItemQty = (cartItems, productToDecrease) => {
+const decreaseItemQty = (cartItems: CartItem[], productToDecrease: CartItem) => {
   return cartItems.map(cartItem =>
     cartItem.id === productToDecrease.id
       ? { ...cartItem, quantity: (cartItem.quantity > 1 ? cartItem.quantity - 1 : cartItem.quantity) }
@@ -19,11 +21,18 @@ const decreaseItemQty = (cartItems, productToDecrease) => {
   )
 
 }
-const removeCartItem = (cartItems, productToRemove) => {
+const removeCartItem = (cartItems: CartItem[], productToRemove: CartItem) => {
   return cartItems.filter(cartItem => cartItem.id !== productToRemove.id)
 }
 
-const INITIAL_STATE = {
+export type CartState = {
+  readonly expanded: boolean,
+  readonly cartItems: CartItem[],
+  readonly cartCount: number,
+  readonly cartTotal: number,
+}
+
+const INITIAL_STATE: CartState = {
   expanded: false,
   cartItems: [],
   cartCount: 0,

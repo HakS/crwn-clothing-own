@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithRedirect, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc, collection, writeBatch, query, getDocs } from 'firebase/firestore';
+import { getAuth, signInWithRedirect, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { getFirestore, doc, getDoc, setDoc, collection, writeBatch, query, getDocs, QueryDocumentSnapshot, Timestamp } from 'firebase/firestore';
+import { Category } from '../../store/categories/category.types';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -11,7 +12,7 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 }
 
-const firebaseApp = initializeApp(firebaseConfig)
+export const firebaseApp = initializeApp(firebaseConfig)
 
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
@@ -24,11 +25,15 @@ export const signInWithGoogleRedirect = () => signInWithRedirect(auth, googlePro
 
 export const db = getFirestore()
 
-export const addCollectionAndDocuments = async (collectionKey, objectsToAdd, field = 'title') => {
+export type ObjectToAdd = {
+  title: string;
+}
+
+export const addCollectionAndDocuments = async <T extends ObjectToAdd> (collectionKey: string, objectsToAdd: T[]) => {
   const collectionRef = collection(db, collectionKey)
   const batch = writeBatch(db)
   objectsToAdd.forEach((object) => {
-    const docRef = doc(collectionRef, object[field].toLowerCase())
+    const docRef = doc(collectionRef, object.title.toLowerCase())
     batch.set(docRef, object)
   })
 
@@ -36,16 +41,35 @@ export const addCollectionAndDocuments = async (collectionKey, objectsToAdd, fie
   console.log('done')
 }
 
-export const getCategoriesAndDocuments = async () => {
+export const getCategoriesAndDocuments = async (): Promise<Category[]> => {
   const collectionRef = collection(db, 'categories')
   const q = query(collectionRef)
 
   const querySnapshot = await getDocs(q)
-  return querySnapshot.docs.map(docSnapshot => docSnapshot.data())
+  return querySnapshot.docs.map(docSnapshot => docSnapshot.data() as Category)
 }
 
+export type AdditionalInformation = {
+  displayName?: string;
+}
+
+export type RawUserData = {
+  uid: string;
+  displayName: string;
+  email: string;
+}
+
+export type FirestoreUserData = {
+  createdAt: Timestamp;
+  displayName: string;
+  email: string;
+}
+
+const testdate: Timestamp = new Timestamp(234345, 234)
+testdate.toJSON()
+
 // Only exposed for user sign up with custom data
-export const createUserDocumentFromAuth = async (userAuth, additionalInfo = {}) => {
+export const createUserDocumentFromAuth = async (userAuth: RawUserData, additionalInfo = {} as AdditionalInformation): Promise<void | QueryDocumentSnapshot<FirestoreUserData>> => {
   if (!userAuth) return
   const userDocRef = doc(db, 'users', userAuth.uid)
 
@@ -59,18 +83,18 @@ export const createUserDocumentFromAuth = async (userAuth, additionalInfo = {}) 
         displayName, email, createdAt, ...additionalInfo,
       })
     } catch (error) {
-      console.error('error creating the user', error.message)
+      console.error('error creating the user', error)
     }
   }
-  return userSnapshot
+  return userSnapshot as QueryDocumentSnapshot<FirestoreUserData>
 }
 
-export const signInAuthUserWithEmailAndPassword = async (email, password) => {
+export const signInAuthUserWithEmailAndPassword = async (email: string, password: string) => {
   if (!email || !password) return
   return await signInWithEmailAndPassword(auth, email, password)
 }
 
-export const createAuthUserWithEmailAndPassword = async (email, password) => {
+export const createAuthUserWithEmailAndPassword = async (email: string, password: string) => {
   if (!email || !password) return
   return await createUserWithEmailAndPassword(auth, email, password)
 }
@@ -78,13 +102,13 @@ export const createAuthUserWithEmailAndPassword = async (email, password) => {
 export const signOutUser = async () => await signOut(auth)
 
 
-export const getCurrentUser = () => {
+export const getCurrentUser = (): Promise<RawUserData | null> => {
   return new Promise((y, n) => {
     const toUnsubscribe = onAuthStateChanged(
       auth,
       (userAuth) => {
         toUnsubscribe()
-        y(userAuth)
+        y(userAuth as RawUserData)
       },
       n
     )

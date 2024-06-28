@@ -1,4 +1,10 @@
-export const syncLogger = (store) => (next) => (action) => {
+import { Middleware, UnknownAction } from "redux"
+import { RootState } from "../store"
+import { PayloadAction } from "@reduxjs/toolkit"
+
+export const syncLogger: Middleware<
+  {},
+  RootState> = (store) => (next) => (action: any) => {
   if (!action.type) return next(action)
   console.log('----type', action.type)
   console.log('----payload', action.payload)

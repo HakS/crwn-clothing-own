@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux'
 
-import { CheckoutItemContainer, ImageContainer, Name, Quantity, Price, Remove, Arrow, Value } from './checkout-item.styles.jsx'
+import { CheckoutItemContainer, ImageContainer, Name, Quantity, Price, Remove, Arrow, Value } from './checkout-item.styles'
 import { addItemToCart, decreaseItemQuantity, removeItemFromCart } from '../../store/cart/cart.reducer'
 
 const CheckoutItem = ({cartItem}) => {

@@ -1,11 +1,12 @@
-import { useState } from "react"
+import { ChangeEvent, FormEvent, useState } from "react"
 import { useDispatch } from "react-redux";
 
-import './sign-up-form.styles.scss'
+import { SignUpContainer } from "./sign-up-form.styles";
 
 import FormInput from '../form-input/form-input.component';
 import Button from '../button/button.component';
 import { signUpStart } from "../../store/user/user.reducer";
+import { useAppDispatch } from "../../store/store";
 
 const defaultFormFields = {
   displayName: '',
@@ -17,13 +18,14 @@ const defaultFormFields = {
 const SignUpForm = () => {
   const [formFields, setFormFields] = useState(defaultFormFields)
   const { displayName, email, password, confirmPassword } = formFields
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
+  // const dispatch = useDispatch()
 
   const resetFormFields = () => {
     setFormFields(defaultFormFields)
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const { displayName, email, password, confirmPassword } = formFields
     if (password !== confirmPassword) {
@@ -31,24 +33,24 @@ const SignUpForm = () => {
       return;
     }
 
-    try {
-      dispatch(signUpStart({displayName, email, password}))
-      resetFormFields()
-    } catch (error) {
-      if (error.code === 'auth/email-already-in-use') {
-        alert ("Cannot create user, email already in use")
-      }
-      console.error('error creating the user', error.message);
-    }
+    dispatch(signUpStart({displayName, email, password}))
+    resetFormFields()
+    // try {
+    // } catch (error) {
+    //   if (error.code === 'auth/email-already-in-use') {
+    //     alert ("Cannot create user, email already in use")
+    //   }
+    //   console.error('error creating the user', error);
+    // }
   }
 
-  const handleChange = (event) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormFields({ ...formFields, [name]: value })
   }
 
   return (
-    <div className="sign-up-container">
+    <SignUpContainer>
       <h2>Don't have an account?</h2>
       <span>Sign up with your email and password</span>
       <form onSubmit={handleSubmit}>
@@ -58,7 +60,7 @@ const SignUpForm = () => {
         <FormInput label="Confirm password" type="password" required onChange={handleChange} name="confirmPassword" value={confirmPassword}/>
         <Button type="submit">Sign Up</Button>
       </form>
-    </div>
+    </SignUpContainer>
   )
 }
 
