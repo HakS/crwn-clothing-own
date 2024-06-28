@@ -32,7 +32,7 @@ const SignUpForm = () => {
     }
 
     try {
-      dispatch(signUpStart(displayName, email, password))
+      dispatch(signUpStart({displayName, email, password}))
       resetFormFields()
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {

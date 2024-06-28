@@ -31,7 +31,7 @@ const SignInForm = () => {
     event.preventDefault()
     const { email, password } = formFields
 
-    dispatch(emailSignInStart(email, password))
+    dispatch(emailSignInStart({email, password}))
     resetFormFields()
   }
 
